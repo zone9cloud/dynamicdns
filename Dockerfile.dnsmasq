@@ -1,0 +1,10 @@
+FROM alpine:3
+
+RUN set -xe \
+    && apk add --no-cache dnsmasq-dnssec 
+
+EXPOSE 53/tcp \
+       53/udp \
+       67/udp
+
+ENTRYPOINT ["dnsmasq", "--no-daemon", "--user=dnsmasq", "--group=dnsmasq"]

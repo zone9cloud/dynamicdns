@@ -1,0 +1,77 @@
+services:
+
+  dnsmasq:
+    image: zone9/dnsmasq:0.1.0
+    ports:
+      - "5053:53"
+      - "5053:53/udp"
+    volumes:
+      - ./config/dnsmasq/dnsmasq.conf:/etc/dnsmasq.conf
+      - ./logs:/var/log/dnsmasq      
+    restart: always
+    networks:
+      dnsmasq:
+        ipv4_address: 10.0.0.53
+    
+
+  ns10:
+    image: zone9/dynamicdns:0.1.0
+    hostname: ns1.ns10.me
+    ports:
+      - "5054:53"
+      - "5054:53/udp"    
+    environment:
+      - DEBUG=1
+      - NIPIO_TLD=".me"
+      - NIPIO_DOMAIN=ns10.me
+      - NIPIO_NAMESERVERS="ns1.ns10.me=127.0.0.1 ns1.ns10.me=127.0.0.1"
+      - NIPIO_SOA_NS=ns1.ns10.me
+      - NIPIO_SOA_HOSTMASTER=hostmaster@ns10.me
+    restart: always
+    networks:
+      dnsmasq:
+        ipv4_address: 10.0.0.54
+                
+  ns172:
+    image: zone9/dynamicdns:0.1.0
+    hostname: ns1.ns172.me
+    ports:
+      - "5055:53"
+      - "5055:53/udp"    
+    environment:
+      - DEBUG=1
+      - NIPIO_TLD=".me"
+      - NIPIO_DOMAIN=ns172.me
+      - NIPIO_NAMESERVERS="ns1.ns172.me=127.0.0.1 ns1.ns172.me=127.0.0.1"
+      - NIPIO_SOA_NS=ns1.ns172.me
+      - NIPIO_SOA_HOSTMASTER=hostmaster@ns172.me  
+    restart: always
+    networks:
+      dnsmasq:
+        ipv4_address: 10.0.0.55
+  ns192:
+    image: zone9/dynamicdns:0.1.0
+    hostname: ns1.ns192.me
+    ports:
+      - "5056:53"
+      - "5056:53/udp"    
+    environment:
+      - DEBUG=1
+      - NIPIO_TLD=".me"
+      - NIPIO_DOMAIN=ns192.me
+      - NIPIO_NAMESERVERS="ns1.ns192.me=127.0.0.1 ns1.ns192.me=127.0.0.1"
+      - NIPIO_SOA_NS=ns1.ns192.me
+      - NIPIO_SOA_HOSTMASTER=hostmaster@ns192.me
+    restart: always
+    networks:
+      dnsmasq:
+        ipv4_address: 10.0.0.56
+
+
+networks:
+  dnsmasq:
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 10.0.0.0/24
+         gateway: 10.0.0.1
