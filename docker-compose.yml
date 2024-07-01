@@ -3,8 +3,8 @@ services:
   dnsmasq:
     image: zone9cloud/dnsmasq:0.1.1
     ports:
-      - "5053:53"
-      - "5053:53/udp"
+      - "53:53"
+      - "53:53/udp"
     volumes:
       - ./config/dnsmasq/dnsmasq.conf:/etc/dnsmasq.conf
       - ./logs:/var/log/dnsmasq      
@@ -44,12 +44,8 @@ services:
   ns172:
     image: zone9cloud/dynamicdns:0.1.1 
     hostname: ns1.ns172.me
-    ports:
-      - "5055:53"
-      - "5055:53/udp"    
     environment:
       - DEBUG=1
-      - DNS_TLD=".me"
       - DNS_DOMAIN=ns172.me
       - DNS_NAMESERVERS="ns1.ns172.me=127.0.0.1 ns1.ns172.me=127.0.0.1"
       - DNS_SOA_NS=ns1.ns172.me
@@ -62,12 +58,8 @@ services:
   ns192:
     image: zone9cloud/dynamicdns:0.1.1 
     hostname: ns1.ns192.me
-    ports:
-      - "5056:53"
-      - "5056:53/udp"    
     environment:
       - DEBUG=1
-      - DNS_TLD=".me"
       - DNS_DOMAIN=ns192.me
       - DNS_NAMESERVERS="ns1.ns192.me=127.0.0.1 ns1.ns192.me=127.0.0.1"
       - DNS_SOA_NS=ns1.ns192.me
