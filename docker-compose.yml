@@ -1,7 +1,7 @@
 services:
 
   dnsmasq:
-    image: zone9/dnsmasq:0.1.0
+    image: zone9cloud/dnsmasq:0.1.1
     ports:
       - "5053:53"
       - "5053:53/udp"
@@ -11,61 +11,71 @@ services:
     restart: always
     networks:
       dnsmasq:
-        ipv4_address: 10.0.0.53
+        ipv4_address: 10.0.0.50
     
-
-  ns10:
-    image: zone9/dynamicdns:0.1.0
-    hostname: ns1.ns10.me
-    ports:
-      - "5054:53"
-      - "5054:53/udp"    
+  ns53:
+    image: zone9cloud/dynamicdns:0.1.1 
+    hostname: ns1.ns53.me
     environment:
       - DEBUG=1
-      - NIPIO_TLD=".me"
-      - NIPIO_DOMAIN=ns10.me
-      - NIPIO_NAMESERVERS="ns1.ns10.me=127.0.0.1 ns1.ns10.me=127.0.0.1"
-      - NIPIO_SOA_NS=ns1.ns10.me
-      - NIPIO_SOA_HOSTMASTER=hostmaster@ns10.me
+      - DNS_DOMAIN=ns53.me
+      - DNS_NAMESERVERS="ns1.ns53.me=127.0.0.1 ns1.ns53.me=127.0.0.1"
+      - DNS_SOA_NS=ns1.ns53.me
+      - DNS_SOA_HOSTMASTER=hostmaster@ns53.me
     restart: always
     networks:
       dnsmasq:
-        ipv4_address: 10.0.0.54
+        ipv4_address: 10.0.0.53
+
+  ns10:
+    image: zone9cloud/dynamicdns:0.1.1 
+    hostname: ns1.ns10.me
+    environment:
+      - DEBUG=1
+      - DNS_DOMAIN=ns10.me
+      - DNS_NAMESERVERS="ns1.ns10.me=127.0.0.1 ns1.ns10.me=127.0.0.1"
+      - DNS_SOA_NS=ns1.ns10.me
+      - DNS_SOA_HOSTMASTER=hostmaster@ns10.me
+    restart: always
+    networks:
+      dnsmasq:
+        ipv4_address: 10.0.0.10
                 
   ns172:
-    image: zone9/dynamicdns:0.1.0
+    image: zone9cloud/dynamicdns:0.1.1 
     hostname: ns1.ns172.me
     ports:
       - "5055:53"
       - "5055:53/udp"    
     environment:
       - DEBUG=1
-      - NIPIO_TLD=".me"
-      - NIPIO_DOMAIN=ns172.me
-      - NIPIO_NAMESERVERS="ns1.ns172.me=127.0.0.1 ns1.ns172.me=127.0.0.1"
-      - NIPIO_SOA_NS=ns1.ns172.me
-      - NIPIO_SOA_HOSTMASTER=hostmaster@ns172.me  
+      - DNS_TLD=".me"
+      - DNS_DOMAIN=ns172.me
+      - DNS_NAMESERVERS="ns1.ns172.me=127.0.0.1 ns1.ns172.me=127.0.0.1"
+      - DNS_SOA_NS=ns1.ns172.me
+      - DNS_SOA_HOSTMASTER=hostmaster@ns172.me  
     restart: always
     networks:
       dnsmasq:
-        ipv4_address: 10.0.0.55
+        ipv4_address: 10.0.0.172
+
   ns192:
-    image: zone9/dynamicdns:0.1.0
+    image: zone9cloud/dynamicdns:0.1.1 
     hostname: ns1.ns192.me
     ports:
       - "5056:53"
       - "5056:53/udp"    
     environment:
       - DEBUG=1
-      - NIPIO_TLD=".me"
-      - NIPIO_DOMAIN=ns192.me
-      - NIPIO_NAMESERVERS="ns1.ns192.me=127.0.0.1 ns1.ns192.me=127.0.0.1"
-      - NIPIO_SOA_NS=ns1.ns192.me
-      - NIPIO_SOA_HOSTMASTER=hostmaster@ns192.me
+      - DNS_TLD=".me"
+      - DNS_DOMAIN=ns192.me
+      - DNS_NAMESERVERS="ns1.ns192.me=127.0.0.1 ns1.ns192.me=127.0.0.1"
+      - DNS_SOA_NS=ns1.ns192.me
+      - DNS_SOA_HOSTMASTER=hostmaster@ns192.me
     restart: always
     networks:
       dnsmasq:
-        ipv4_address: 10.0.0.56
+        ipv4_address: 10.0.0.192
 
 
 networks:

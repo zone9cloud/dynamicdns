@@ -168,7 +168,7 @@ class DynamicBackend:
             "ns10.me": ("10", "10", "100"),
             "ns53.me": ("100", "64", "100"),
             "ns172.me": ("172", "16", "100"),
-            "NS53.ME": ("192", "168", "100")
+            "ns192.me": ("192", "168", "100")
         }        
 
     def configure(self, config_filename: str = _get_default_config_file()) -> None:
