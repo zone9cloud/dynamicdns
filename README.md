@@ -3,6 +3,13 @@
 Just like nip.io or xip.io, dynamicdns is a magic domain name that provides
 wildcard DNS for any Private IP address.
 
+| IP Address Range | Network Type | Description |
+| ----- | ----- | ----- |
+| 10.0.0.0/8	 | Private | Large-scale private networks |
+| 172.16.0.0/12	 | Private | Medium-scale private networks |
+| 192.168.0.0/16 | Private | Small-scale private networks |
+| 100.64.0.0/10	 | CGNAT   | (Carrier-Grade NAT) Addresses used by Internet Service Providers (NAT44) |
+
 Stop editing your etc/hosts file with custom hostname and IP address mappings.
 
 ns10.me, ns172.me, ns192.me allows you to do that by mapping any IP Address to a hostname using the following formats:
@@ -12,6 +19,7 @@ ns10.me, ns172.me, ns192.me allows you to do that by mapping any IP Address to a
 ```shell
 default_octets = {
     "10": ("10", "100"),
+    "100": ("64", "100"),
     "127": ("0", "100"),
     "172": ("16", "100"),
     "192": ("168", "100")
@@ -19,13 +27,15 @@ default_octets = {
 ```
 
 ## with use default octets
-- my.ns53.me maps to 127.0.0.1 
+- home.ns53.me maps to 127.0.0.1 
+- local.ns53.me maps to 127.0.0.1 
 
 ## with use default octets
 
-- apps.firm8.ns10.me maps to 10.10.8.100
-- apps.firm8.ns172.me  maps to 172.16.8.100
-- apps.firm8.ns192.me  maps to 192.168.8.100
+- apps.firm8.ns53.me maps to 100.64.8.100
+- apps.customer8.ns10.me maps to 10.10.8.100
+- apps.region8.ns172.me  maps to 172.16.8.100
+- apps.vlan8.ns192.me  maps to 192.168.8.100
 
 
 ## other usage
@@ -44,15 +54,6 @@ It's open source, licensed under Apache 2.0: https://github.com/zone9cloud/dynam
 This is a free service provided by zone9.cloud. 
 
 Feedback is appreciated, just raise an issue in [GitHub](https://github.com/zone9cloud/dynamicdns/issues).
-
-
-| IP Address Range | Network Type | Description |
-| ----- | ----- | ----- |
-| 10.0.0.0/8	 | Private | Large-scale private networks |
-| 172.16.0.0/12	 | Private | Medium-scale private networks |
-| 192.168.0.0/16 | Private | Small-scale private networks |
-| 100.64.0.0/10	 | CGNAT   | (Carrier-Grade NAT) Addresses used by Internet Service Providers (NAT44) |
-
 
 
 # Troubleshooting
