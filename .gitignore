@@ -195,3 +195,5 @@ yarn-error.log*
 next-env.d.ts
 
 poetry.lock
+
+test.py

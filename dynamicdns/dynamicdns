@@ -103,6 +103,8 @@ NIP_dash_TLS  https://{app_name.upper()}{ip_dash}.nip.io
 # Lowercase dash
 NIP_dash      http://{app_name.lower()}{ip_dash}.nip.io
 NIP_dash_TLS  https://{app_name.lower()}{ip_dash}.nip.io
+# NIP_B36       http://{app_name.lower()}{b36_name}.nip.io
+# NIP_B36_TLS   https://{app_name.lower()}{b36_name}.nip.io
 """
 # NOT implemented at this time on nip.io
 # does not work, but will look to change that :)

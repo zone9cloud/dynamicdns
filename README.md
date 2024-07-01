@@ -19,6 +19,9 @@ default_octets = {
 ```
 
 ## with use default octets
+- my.ns53.me maps to 127.0.0.1 
+
+## with use default octets
 
 - apps.firm8.ns10.me maps to 10.10.8.100
 - apps.firm8.ns172.me  maps to 172.16.8.100
@@ -42,6 +45,15 @@ This is a free service provided by zone9.cloud.
 
 Feedback is appreciated, just raise an issue in [GitHub](https://github.com/zone9cloud/dynamicdns/issues).
 
+
+| IP Adres Aralığı |	Ağ Türü |	Açıklama |
+| ----- | ----- | ----- |
+| 10.0.0.0/8	   | Özel (Private)	| Büyük ölçekli özel ağlar |
+| 172.16.0.0/12	 | Özel (Private)	| Orta ölçekli özel ağlar |
+| 192.168.0.0/16 | Özel (Private)	| Küçük ölçekli özel ağlar |
+| 100.64.0.0/10	 | CGNAT	        | [(Carrier-Grade NAT)](https://en.wikipedia.org/wiki/Carrier-grade_NAT)	İnternet servis sağlayıcıları tarafından kullanılan adresler (NAT44) |
+
+
 # Troubleshooting
 
 **DNS Rebinding Protection**
@@ -49,7 +61,7 @@ Feedback is appreciated, just raise an issue in [GitHub](https://github.com/zone
 Some DNS resolvers, forwarders and routers have DNS rebinding protection which may result in failure to resolve local and private IP addresses. This service won't work in those situations. 
 
 
-Related Services
+## Related Services
 
 - nip.io: Dead simple wildcard DNS for any IP Address.
 - localtls: A DNS server in Python3 to provide TLS to webservices on local addresses. It resolves addresses such as '192-168-0-1.yourdomain.net' to 192.168.0.1 and has a valid TLS certificate for them.

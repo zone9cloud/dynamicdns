@@ -99,19 +99,15 @@ def _get_default_config_file() -> str:
     return os.path.join(os.path.dirname(os.path.realpath(__file__)), "backend.conf")
 
 
-def extract_digits(subparts, domain) -> list:
-    subparts_copy = subparts.copy()
-    subparts_copy.append(domain)
-    digits = []
-
-    _log(f"subparts_copy {subparts_copy}")
+def extract_octets(subparts) -> list:
+    octets = []
     
-    for subpart in subparts_copy:
+    for subpart in subparts:
         match = re.search(r'(\d+)', subpart)
         if match:
-            digits.append(match.group(1))
+            octets.append(match.group(1))
     
-    return digits
+    return octets
 
 
 class DynamicBackend:
@@ -130,22 +126,22 @@ class DynamicBackend:
         auth
 
     Environment variables:
-    NIPIO_DOMAIN -- NS192.ME main domain.
-    NIPIO_TTL -- Default TTL for NS192.ME backend.
-    NIPIO_NONWILD_DEFAULT_IP -- Default IP address for non-wildcard entries.
-    NIPIO_SOA_ID -- SOA serial number.
-    NIPIO_SOA_HOSTMASTER -- SOA hostmaster email address.
-    NIPIO_SOA_NS -- SOA name server.
-    NIPIO_SOA_REFRESH -- SOA refresh.
-    NIPIO_SOA_RETRY -- SOA retry.
-    NIPIO_SOA_EXPIRY -- SOA expiry.
-    NIPIO_SOA_MINIMUM_TTL -- SOA minimum time-to-live (TTL).
-    NIPIO_NAMESERVERS -- A space-separated list of domain=ip nameserver pairs.
-    NIPIO_WHITELIST -- A space-separated list of description=range pairs to whitelist.
+    DNS_DOMAIN -- NS53.ME main domain.
+    DNS_TTL -- Default TTL for NS53.ME backend.
+    DNS_NONWILD_DEFAULT_IP -- Default IP address for non-wildcard entries.
+    DNS_SOA_ID -- SOA serial number.
+    DNS_SOA_HOSTMASTER -- SOA hostmaster email address.
+    DNS_SOA_NS -- SOA name server.
+    DNS_SOA_REFRESH -- SOA refresh.
+    DNS_SOA_RETRY -- SOA retry.
+    DNS_SOA_EXPIRY -- SOA expiry.
+    DNS_SOA_MINIMUM_TTL -- SOA minimum time-to-live (TTL).
+    DNS_NAMESERVERS -- A space-separated list of domain=ip nameserver pairs.
+    DNS_WHITELIST -- A space-separated list of description=range pairs to whitelist.
                        The range should be in CIDR format.
-    NIPIO_BLACKLIST -- A space-separated list of description=ip blacklisted pairs.
-    NIPIO_AUTH -- Indicates whether this response is authoritative, this is for DNSSEC.
-    NIPIO_BITS -- Scopebits indicates how many bits from the subnet provided in
+    DNS_BLACKLIST -- A space-separated list of description=ip blacklisted pairs.
+    DNS_AUTH -- Indicates whether this response is authoritative, this is for DNSSEC.
+    DNS_BITS -- Scopebits indicates how many bits from the subnet provided in
                   the question.
 
     Example:
@@ -159,6 +155,7 @@ class DynamicBackend:
     def __init__(self) -> None:
         self.id = ""
         self.soa = ""
+        self.tld = ""
         self.domain = ""
         self.ip_address = ""
         self.ttl = ""
@@ -166,15 +163,13 @@ class DynamicBackend:
         self.whitelisted_ranges: List[IPv4Network] = []
         self.blacklisted_ips: List[str] = []
         self.bits = "0"
-        self.auth = "1"
-        self.default_digits = {
-            "10": ("10", "100"),
-            "127": ("0", "100"),
-            "172": ("16", "100"),
-            "192": ("168", "100")
-        }
-        self.tld = ".me"
-
+        self.auth = "1"          
+        self.domain_octets = {            
+            "ns10.me": ("10", "10", "100"),
+            "ns53.me": ("100", "64", "100"),
+            "ns172.me": ("172", "16", "100"),
+            "NS53.ME": ("192", "168", "100")
+        }        
 
     def configure(self, config_filename: str = _get_default_config_file()) -> None:
         """Configure the pipe backend using the backend.conf file.
@@ -189,42 +184,43 @@ class DynamicBackend:
             config = configparser.ConfigParser()
             config.read_file(fp)
 
-        self.id = os.getenv("NIPIO_SOA_ID", config.get("soa", "id"))
+        self.id = os.getenv("DNS_SOA_ID", config.get("soa", "id"))
         self.soa = "%s %s %s %s %s %s %s" % (
-            _resolve_configuration("NIPIO_SOA_NS", config, "soa", "ns"),
-            _resolve_configuration("NIPIO_SOA_HOSTMASTER", config, "soa", "hostmaster"),
+            _resolve_configuration("DNS_SOA_NS", config, "soa", "ns"),
+            _resolve_configuration("DNS_SOA_HOSTMASTER", config, "soa", "hostmaster"),
             self.id,
-            _resolve_configuration("NIPIO_SOA_REFRESH", config, "soa", "refresh"),
-            _resolve_configuration("NIPIO_SOA_RETRY", config, "soa", "retry"),
-            _resolve_configuration("NIPIO_SOA_EXPIRY", config, "soa", "expiry"),
-            _resolve_configuration("NIPIO_SOA_MINIMUM_TTL", config, "soa", "minimum"),
+            _resolve_configuration("DNS_SOA_REFRESH", config, "soa", "refresh"),
+            _resolve_configuration("DNS_SOA_RETRY", config, "soa", "retry"),
+            _resolve_configuration("DNS_SOA_EXPIRY", config, "soa", "expiry"),
+            _resolve_configuration("DNS_SOA_MINIMUM_TTL", config, "soa", "minimum"),
         )
-        self.domain = os.getenv("NIPIO_DOMAIN", config.get("main", "domain"))
-        self.tld =os.getenv("NIPIO_TLD", config.get("main", "tld"))
+        self.domain = os.getenv("DNS_DOMAIN", config.get("main", "domain"))        
         self.ip_address = os.getenv(
-            "NIPIO_NONWILD_DEFAULT_IP", config.get("main", "ipaddress")
+            "DNS_NONWILD_DEFAULT_IP", config.get("main", "ipaddress")
         )
-        self.ttl = os.getenv("NIPIO_TTL", config.get("main", "ttl"))
+        self.ttl = os.getenv("DNS_TTL", config.get("main", "ttl"))
         self.name_servers = dict(
-            _get_env_splitted("NIPIO_NAMESERVERS", config.items("nameservers"))
+            _get_env_splitted("DNS_NAMESERVERS", config.items("nameservers"))
         )
-        self.bits = os.getenv("NIPIO_BITS", config.get("main", "bits"))
-        self.auth = os.getenv("NIPIO_AUTH", config.get("main", "auth"))
+        self.bits = os.getenv("DNS_BITS", config.get("main", "bits"))
+        self.auth = os.getenv("DNS_AUTH", config.get("main", "auth"))
 
-        if "NIPIO_WHITELIST" in os.environ or config.has_section("whitelist"):
+        if "DNS_WHITELIST" in os.environ or config.has_section("whitelist"):
             for entry in _get_env_splitted(
-                "NIPIO_WHITELIST",
+                "DNS_WHITELIST",
                 config.items("whitelist") if config.has_section("whitelist") else [],
             ):
                 # Convert the given range to an IPv4Network
                 self.whitelisted_ranges.append(IPv4Network(entry[1]))
 
-        if "NIPIO_BLACKLIST" in os.environ or config.has_section("blacklist"):
+        if "DNS_BLACKLIST" in os.environ or config.has_section("blacklist"):
             for entry in _get_env_splitted(
-                "NIPIO_BLACKLIST",
+                "DNS_BLACKLIST",
                 config.items("blacklist") if config.has_section("blacklist") else [],
             ):
                 self.blacklisted_ips.append(entry[1])
+        
+        self.tld = self.domain.split(".")[-1]
 
         _log(f"Name servers: {self.name_servers}")
         _log(f"ID: {self.id}")
@@ -245,7 +241,7 @@ class DynamicBackend:
         if handshake[1] != "5":
             _log(f"Not version 5: {handshake}")
             sys.exit(1)
-        _write("OK", "ns192.me backend - We are good")
+        _write("OK", "ns53.me backend - We are good")
         _log("Done handshake")
 
         while True:
@@ -304,34 +300,35 @@ class DynamicBackend:
         subdomain = qname[0 : qname.find(self.domain) - 1]
         subparts = self._split_subdomain(subdomain)
 
-        _log(f"qname {qname}")
-        _log(f"tld {self.tld}")
-        _log(f"domain {self.domain}")
-        _log(f"subdomain {subdomain}")
-        _log(f"subparts {subparts}")
+        domain_octets = self.domain_octets.get(self.domain)
+        octets = extract_octets(subparts) + [domain_octets[0]]
 
-        digits = extract_digits(subparts, self.domain.replace(self.tld, ""))        
-        default_digits = self.default_digits.get(digits[-1:][0])
+        if _is_debug():
+            _log(f"qname {qname}")
+            _log(f"tld {self.tld}")
+            _log(f"domain {self.domain}")
+            _log(f"subdomain {subdomain}")
+            _log(f"subparts {subparts}")        
+            _log(f"octets {octets}")
+            _log(f"default_octets {domain_octets}")
         
-        _log(f"default_digits {default_digits}")
-        _log(f"digits {digits}")
 
-        if len(digits) == 2:                        
-            digits = [default_digits[1], digits[0], default_digits[0], digits[1]]
-        elif len(digits) == 3:
-            digits = [default_digits[1], digits[0], digits[1], digits[2]]
-        elif len(digits) == 4:
-            digits = [digits[0], digits[1], digits[2], digits[3]]
+        if len(octets) == 2:                        
+            octets = [domain_octets[0], domain_octets[1], octets[0], octets[1]]
+        elif len(octets) == 3:
+            octets = [domain_octets[0], domain_octets[1], octets[1], octets[0]]
+        elif len(octets) == 4:
+            octets = [octets[3], octets[2], octets[1], octets[0]]
         
-        if len(digits) < 4:
+        if len(octets) < 4:
             if _is_debug():
-                _log("digits less than 4")
-            self.handle_invalid_ip(f" {qname}, {digits} {subparts}, {self.domain}")
+                _log("octets less than 4")
+            self.handle_invalid_ip(f" {qname}")
             return
 
         # Calculate the IP address string from the extracts parts
         try:
-            ip_address = IPv4Address(".".join(digits[::-1]))
+            ip_address = IPv4Address(".".join(octets))
         except AddressValueError:
             self.handle_invalid_ip(qname)
             return
