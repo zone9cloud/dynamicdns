@@ -12,7 +12,7 @@ wildcard DNS for any Private IP address.
 
 Stop editing your etc/hosts file with custom hostname and IP address mappings.
 
-ns10.me, ns172.me, ns192.me allows you to do that by mapping any IP Address to a hostname using the following formats:
+ns53.me, ns10.me, ns172.me, ns192.me allows you to do that by mapping any IP Address to a hostname using the following formats:
 
 ## default octets:
 
@@ -26,7 +26,7 @@ default_octets = {
 }
 ```
 
-## with use default octets
+## Examples
 - home.ns53.me maps to 127.0.0.1 
 - local.ns53.me maps to 127.0.0.1 
 
