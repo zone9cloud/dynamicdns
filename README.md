@@ -46,12 +46,13 @@ This is a free service provided by zone9.cloud.
 Feedback is appreciated, just raise an issue in [GitHub](https://github.com/zone9cloud/dynamicdns/issues).
 
 
-| IP Adres Aralığı |	Ağ Türü |	Açıklama |
+| IP Address Range | Network Type | Description |
 | ----- | ----- | ----- |
-| 10.0.0.0/8	   | Özel (Private)	| Büyük ölçekli özel ağlar |
-| 172.16.0.0/12	 | Özel (Private)	| Orta ölçekli özel ağlar |
-| 192.168.0.0/16 | Özel (Private)	| Küçük ölçekli özel ağlar |
-| 100.64.0.0/10	 | CGNAT	        | [(Carrier-Grade NAT)](https://en.wikipedia.org/wiki/Carrier-grade_NAT)	İnternet servis sağlayıcıları tarafından kullanılan adresler (NAT44) |
+| 10.0.0.0/8	 | Private | Large-scale private networks |
+| 172.16.0.0/12	 | Private | Medium-scale private networks |
+| 192.168.0.0/16 | Private | Small-scale private networks |
+| 100.64.0.0/10	 | CGNAT   | (Carrier-Grade NAT) Addresses used by Internet Service Providers (NAT44) |
+
 
 
 # Troubleshooting
